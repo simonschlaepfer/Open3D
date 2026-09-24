@@ -145,6 +145,16 @@ TEST(OrientedBoundingBox, TransformProjective) {
     EXPECT_THROW(box.Transform(transformation), std::runtime_error);
 }
 
+// A coefficient small enough to pass a relative comparison still moves this
+// box by about one unit.
+TEST(OrientedBoundingBox, TransformSmallProjectiveCoefficient) {
+    Matrix4d transformation = Matrix4d::Identity();
+    transformation(3, 0) = 1e-6;
+
+    OrientedBoundingBox box({1000, 0, 0}, Matrix3d::Identity(), {2, 2, 2});
+    EXPECT_THROW(box.Transform(transformation), std::runtime_error);
+}
+
 TEST(OrientedBoundingEllipsoid, TransformUniformScale) {
     const Matrix4d transformation =
             MakeTransform(2.0 * TestRotation(), {-4, 5, 0.5});

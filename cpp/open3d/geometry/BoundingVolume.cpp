@@ -35,9 +35,14 @@ DecomposeSimilarityTransform(const Eigen::Matrix4d& transformation,
                              const char* geometry_name) {
     // Loose enough for a rotation accumulated in single precision.
     constexpr double tolerance = 1e-5;
+    // Absolute, because a relative comparison against [0, 0, 0, 1] is dominated
+    // by the 1 and lets through a coefficient that still displaces a geometry
+    // far from the origin.
+    constexpr double affine_tolerance = 1e-12;
 
-    if (!transformation.row(3).isApprox(Eigen::RowVector4d(0.0, 0.0, 0.0, 1.0),
-                                        tolerance)) {
+    if ((transformation.row(3) - Eigen::RowVector4d(0.0, 0.0, 0.0, 1.0))
+                .cwiseAbs()
+                .maxCoeff() > affine_tolerance) {
         utility::LogError(
                 "A projective transform of a {} is not supported, its last "
                 "row is [{}, {}, {}, {}].",
